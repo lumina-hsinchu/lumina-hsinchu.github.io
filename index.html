@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f1f1f1">
+<title>LUMINA AI 解籤｜我的籤詩</title>
+<meta property="og:title" content="LUMINA AI 解籤｜我的籤詩">
+<meta property="og:description" content="新竹文創館 LUMINA AI 解籤體驗，收下屬於你的籤詩。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f1f1f1;
+    --paper: #fbfbfa;
+    --ink: #0e334d;
+    --ink-soft: #4a6274;
+    --accent: #8f7798;
+    --accent-soft: #e6dfe8;
+    --line: #d9d6dc;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100dvh;
+    background:
+      radial-gradient(120% 60% at 50% 0%, #ffffff 0%, rgba(255,255,255,0) 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  }
+  header { text-align: center; margin: 8px 0 18px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .32em; color: var(--accent);
+    margin: 0 0 6px; padding-left: .32em;
+  }
+  h1 {
+    font-family: "Noto Serif TC", serif; font-weight: 700;
+    font-size: clamp(28px, 8vw, 36px); letter-spacing: .12em;
+    margin: 0; padding-left: .12em;
+  }
+  .sub { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); letter-spacing: .08em; }
+
+  main { width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; }
+
+  .card {
+    position: relative; width: 100%;
+    aspect-ratio: 600 / 981;
+    background: var(--paper);
+    border-radius: 14px;
+    box-shadow: 0 1px 0 rgba(14,51,77,.04), 0 18px 40px -18px rgba(14,51,77,.35);
+    overflow: hidden;
+  }
+  .card img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .6s ease, transform .6s ease;
+    -webkit-touch-callout: default;
+  }
+  .card img.ready { opacity: 1; transform: none; }
+  .card .loading {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: var(--ink-soft); font-size: 14px; letter-spacing: .1em;
+  }
+
+  .actions { width: 100%; display: flex; gap: 10px; margin-top: 18px; }
+  .btn {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 48px; border-radius: 999px; text-decoration: none;
+    font-size: 15px; font-weight: 600; letter-spacing: .08em;
+    border: 1px solid var(--ink); color: var(--ink); background: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn.primary { background: var(--ink); color: #fff; }
+  .btn:active { transform: scale(.98); }
+  .btn svg { width: 18px; height: 18px; }
+
+  .hint {
+    margin: 12px 0 0; font-size: 12.5px; color: var(--ink-soft); text-align: center; line-height: 1.7;
+  }
+
+  .empty {
+    width: 100%; text-align: center; padding: 48px 20px;
+    background: var(--paper); border-radius: 14px; border: 1px dashed var(--line);
+    line-height: 1.9; color: var(--ink-soft);
+  }
+  .empty strong { color: var(--ink); font-family: "Noto Serif TC", serif; font-size: 18px; }
+
+  footer {
+    margin-top: auto; padding-top: 28px; font-size: 11.5px; color: var(--ink-soft);
+    letter-spacing: .1em; text-align: center; line-height: 1.8;
+  }
+  footer span { display: inline-block; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent); vertical-align: middle; margin: 0 8px; }
+</style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">LUMINA AI 解籤</p>
+    <h1 id="title">我的籤詩</h1>
+    <p class="sub" id="sub">新竹文創館</p>
+  </header>
+
+  <main id="main"></main>
+
+  <footer>中華電信新竹營運處<span></span>新竹文創館</footer>
+
+<script>
+(function () {
+  var main = document.getElementById('main');
+
+  // 網址格式：/?k=8碼隨機代碼（不含籤號，無法用改數字的方式看到其他籤）
+  var k = (new URLSearchParams(location.search).get('k') || '').toLowerCase();
+  if (!/^[0-9a-f]{8}$/.test(k)) {
+    main.innerHTML =
+      '<div class="empty"><strong>請掃描現場的 QR Code</strong><br>' +
+      '完成 LUMINA 解籤後，<br>即可在這裡收下屬於你的籤詩。</div>';
+    return;
+  }
+
+  var src = 'cards/' + k + '.jpg';
+  var name = '我的籤詩';
+
+  main.innerHTML =
+    '<div class="card"><div class="loading" id="loading">籤詩載入中…</div>' +
+      '<img id="cardImg" alt="LUMINA 籤詩" decoding="async"></div>' +
+    '<div class="actions">' +
+      '<a class="btn primary" id="dl" href="' + src + '" download="LUMINA_籤詩.jpg">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>' +
+        '儲存籤詩</a>' +
+      '<a class="btn" id="share" href="' + src + '" target="_blank" rel="noopener">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>' +
+        '開啟大圖</a>' +
+    '</div>' +
+    '<p class="hint">iPhone 或 LINE 內開啟時，請長按籤詩圖片選擇「儲存」</p>';
+
+  var img = document.getElementById('cardImg');
+  img.onload = function () {
+    img.classList.add('ready');
+    var l = document.getElementById('loading'); if (l) l.remove();
+  };
+  img.onerror = function () {
+    main.innerHTML =
+      '<div class="empty"><strong>找不到這支籤詩</strong><br>' +
+      '請重新掃描現場的 QR Code。</div>';
+  };
+  img.src = src;
+
+  // 支援系統分享面板（手機）時，把「開啟大圖」改成「分享」
+  if (navigator.share) {
+    var s = document.getElementById('share');
+    s.lastChild.textContent = '分享';
+    s.addEventListener('click', function (e) {
+      e.preventDefault();
+      navigator.share({ title: 'LUMINA AI 解籤｜' + name, url: location.href }).catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
